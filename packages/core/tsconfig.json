@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",
+      "module": "ESNext",
+      "declaration": true,
+      "declarationDir": "./dist/types",
+      "isolatedModules": true,
+      "strict": false,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "lib": ["ESNext", "DOM"],
+      "skipLibCheck": true,
+      "experimentalDecorators": true
+    },
+    "files": ["./index.ts"],
+  }

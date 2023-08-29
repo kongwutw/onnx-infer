@@ -1,0 +1,50 @@
+{
+  "name": "@onnx-infer/webgl",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "index.ts",
+  "module": "index.ts",
+  "publishConfig": {
+    "main": "dist/index.cjs.js",
+    "module": "dist/index.esm.js",
+    "typings": "dist/types/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.esm.js",
+        "require": "./dist/index.cjs.js"
+      },
+      "./dist": "./dist/index.umd.js",
+      "./dist/*.js": "./dist/*.js",
+      "./lib/*": "./lib/*",
+      "./*": "./*"
+    }
+  },
+  "files": [
+    "lib",
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "rm": "rimraf ./dist",
+    "build": "rollup -c rollup.config.js",
+    "typecheck": "tsc --noEmit",
+    "release": "pnpm publish",
+    "unrelease": "pnpm unpublish --force --registry=http://r.npm.sankuai.com/"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.0",
+    "rollup": "^3.17.2",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "tslib": "^2.5.0",
+    "flatbuffers": "^1.12.0",
+    "guid-typescript": "^1.0.9",
+    "long": "^4.0.0",
+    "onnx-proto": "^4.0.4",
+    "onnx-infer/core": "file:../core",
+    "typescript": "^4.4.4"
+  }
+}

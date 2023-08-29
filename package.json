@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "pnpm -C site start",
+    "preinstall": "npx only-allow pnpm",
+    "build:site": "pnpm -C site build"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
