@@ -12,12 +12,16 @@
 
 <script lang="ts" setup>
 import { onMounted } from 'vue';
-import { getYoloInputByElm, fetchImg } from './utils';
+// import { Tensor } from 'onnxruntime-web';
+import { Tensor } from '@onnx-infer/webgl';
+
+import { getYoloInputByElm, fetchImg, getImgTensorByUrl, getMaxIndex } from './utils';
 // import { getYoloInputByElm, fetchImg } from '@onnx-infer/utils';
 
-import { initONNX, runONNX } from './onnx';
+import { initONNX, runONNX, init } from './onnx';
+import { imageNetCls } from './cls';
 
-let testImg: string = $ref('1.png');
+let testImg: string = $ref('cat.jpeg');
 
 let onnx: any;
 
@@ -56,10 +60,30 @@ const onChange = async () => {
   const { float32Data, xRatio, yRatio } = await getYoloInputByElm(img, 640, 640, '#fff');
 
   await runONNX(onnx, float32Data, xRatio, yRatio);
+
+  const data: Float32Array = await getImgTensorByUrl(testImg, {
+      gapFillWith: '#fff',
+      mean: [0.485, 0.456, 0.406],
+      std: [0.229, 0.224, 0.225],
+      bgr: false,
+      scale: 256,
+      keepRatio: true,
+  }, { channel: 3, height: 224, width: 224 });
+
+  const tensor = new Tensor('float32', data, [1, 3, 224, 224]);
+
+  const { output } = await onnx.run({ input: tensor});
+
+  const index = getMaxIndex(output.data);
+
+
+  // console.log('res', imageNetCls[index]);
 }
 
 onMounted(async () => {
   onnx = await initONNX();
+  // onnx = await init();
+  // console.log('onnx', onnx);
 });
 </script>
 

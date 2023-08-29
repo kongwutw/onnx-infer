@@ -1,7 +1,7 @@
 import {env} from '@onnx-infer/core';
 
 import * as DataEncoders from './texture-data-encoder';
-import {DataEncoder, Encoder} from './texture-data-encoder';
+import {DataEncoder, DataArrayType, DataType, Usage} from './texture-data-encoder';
 import {repeatedTry} from './utils';
 
 export interface FenceContext {
@@ -77,7 +77,7 @@ export class WebGLContext {
     this.queryVitalParameters();
   }
 
-  allocateTexture(width: number, height: number, encoder: DataEncoder, data?: Encoder.DataArrayType): WebGLTexture {
+  allocateTexture(width: number, height: number, encoder: DataEncoder, data?: DataArrayType): WebGLTexture {
     const gl = this.gl;
     // create the texture
     const texture = gl.createTexture();
@@ -98,7 +98,7 @@ export class WebGLContext {
     return texture as WebGLTexture;
   }
   updateTexture(
-      texture: WebGLTexture, width: number, height: number, encoder: DataEncoder, data: Encoder.DataArrayType): void {
+      texture: WebGLTexture, width: number, height: number, encoder: DataEncoder, data: DataArrayType): void {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, texture);
     const buffer = encoder.encode(data, width * height);
@@ -123,8 +123,8 @@ export class WebGLContext {
     gl.scissor(0, 0, width, height);
   }
   readTexture(
-      texture: WebGLTexture, width: number, height: number, dataSize: number, dataType: Encoder.DataType,
-      channels: number): Encoder.DataArrayType {
+      texture: WebGLTexture, width: number, height: number, dataSize: number, dataType: DataType,
+      channels: number): DataArrayType {
     const gl = this.gl;
     if (!channels) {
       channels = 1;
@@ -254,14 +254,14 @@ ${shaderSource}`);
   deleteProgram(program: WebGLProgram): void {
     this.gl.deleteProgram(program);
   }
-  getEncoder(dataType: Encoder.DataType, channels: number, usage: Encoder.Usage = Encoder.Usage.Default): DataEncoder {
+  getEncoder(dataType: DataType, channels: number, usage: Usage = Usage.Default): DataEncoder {
     if (this.version === 2) {
       return new DataEncoders.RedFloat32DataEncoder(this.gl as WebGL2RenderingContext, channels);
     }
 
     switch (dataType) {
       case 'float':
-        if (usage === Encoder.Usage.UploadOnly || this.isRenderFloat32Supported) {
+        if (usage === Usage.UploadOnly || this.isRenderFloat32Supported) {
           return new DataEncoders.RGBAFloatDataEncoder(this.gl, channels);
         } else {
           return new DataEncoders.RGBAFloatDataEncoder(

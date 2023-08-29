@@ -1,7 +1,7 @@
 import {Logger, Profiler} from '../instrument';
 import {Tensor} from '../tensor';
 
-import {Encoder} from './texture-data-encoder';
+import {DataArrayType, Usage} from './texture-data-encoder';
 import {TextureLayoutStrategy} from './texture-layout-strategy';
 import {TextureData, TextureLayout} from './types';
 import {WebGLContext} from './webgl-context';
@@ -36,11 +36,11 @@ export class TextureManager {
     }
   }
   createTextureFromLayout(
-      dataType: Tensor.DataType, layout: TextureLayout, data?: Tensor.NumberType, usage?: Encoder.Usage) {
+      dataType: Tensor.DataType, layout: TextureLayout, data?: Tensor.NumberType, usage?: Usage) {
     const textureDataType = this.toEncoderType(dataType);
 
     const encoder = this.glContext.getEncoder(textureDataType, layout.channels || 1, usage);
-    if (layout.isPacked && usage === Encoder.Usage.UploadOnly) {
+    if (layout.isPacked && usage === Usage.UploadOnly) {
       throw new Error('not implemented');
     }
     const width = layout.width;
@@ -60,7 +60,7 @@ export class TextureManager {
       if (idleTextures && idleTextures.length > 0) {
         const texture = idleTextures.pop()!;
         inUseTextures.push(texture);
-        if (usage === Encoder.Usage.UploadOnly) {
+        if (usage === Usage.UploadOnly) {
           this.glContext.updateTexture(texture, width, height, encoder, this.toTextureData(dataType, data)!);
         }
         return texture;
@@ -146,7 +146,7 @@ export class TextureManager {
       this.glContext.deleteTexture(textureData.texture);
     }
   }
-  toTensorData(dataType: Tensor.DataType, data: Encoder.DataArrayType): Tensor.NumberType {
+  toTensorData(dataType: Tensor.DataType, data: DataArrayType): Tensor.NumberType {
     switch (dataType) {
       case 'int16':
         return data instanceof Int16Array ? data : Int16Array.from(data);
@@ -169,7 +169,7 @@ export class TextureManager {
         throw new Error(`TensorData type ${dataType} is not supported`);
     }
   }
-  toTextureData(dataType: Tensor.DataType, data: Tensor.NumberType|undefined): Encoder.DataArrayType|undefined {
+  toTextureData(dataType: Tensor.DataType, data: Tensor.NumberType|undefined): DataArrayType|undefined {
     if (!data) {
       return undefined;
     }
@@ -193,7 +193,7 @@ export class TextureManager {
     }
     */
   }
-  toEncoderType(_dataType: Tensor.DataType): Encoder.DataType {
+  toEncoderType(_dataType: Tensor.DataType): DataType {
     return 'float';
     // switch (dataType) {
     //   case 'int16':

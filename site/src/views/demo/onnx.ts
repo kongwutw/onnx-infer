@@ -1,11 +1,13 @@
-import { InferenceSession, Tensor, env } from 'onnxruntime-web';
+// import { InferenceSession, Tensor, env } from 'onnxruntime-web';
+
+import { InferenceSession, Tensor, env } from '@onnx-infer/webgl';
 
 const createSession = async(fileName: string) => {
     const url = `/models/${fileName}`;
     const response = await fetch(url);
     const modelFile = await response.arrayBuffer();
-    // const session = await InferenceSession.create(modelFile, { executionProviders: ['webgl'] });
-    const session = await InferenceSession.create(modelFile, { executionProviders: ['wasm'] });
+    const session = await InferenceSession.create(modelFile, { executionProviders: ['webgl'] });
+    // const session = await InferenceSession.create(modelFile, { executionProviders: ['wasm'] });
     return session;
 };
 
@@ -16,6 +18,14 @@ const overflowBoxes = (box: any, maxSize: any) => {
     box[3] = box[1] + box[3] <= maxSize ? box[3] : maxSize - box[1];
     return box;
   };
+
+export const init = async() => {
+    env.wasm.simd = true;
+    env.wasm.numThreads = 1;
+    env.wasm.proxy = false;
+    const res = await createSession('mobilenetv2.onnx');
+    return res;
+};
 
 export const initONNX = async() => {
     env.wasm.simd = true;

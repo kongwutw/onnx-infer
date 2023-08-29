@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
+    "moduleResolution": "node16",
     "declaration": true,
     "declarationDir": "./dist/types",
     "isolatedModules": true,
     "strict": false,
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": ["ESNext", "ESNext.BigInt", "DOM"],

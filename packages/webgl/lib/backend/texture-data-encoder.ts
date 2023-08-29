@@ -1,20 +1,35 @@
 import {Logger} from '../instrument';
 
-export declare namespace Encoder {
-  export interface DataTypeMap {
-    float: Float32Array;
-    byte: Uint8Array;
-    int: Uint32Array;
-  }
-  export type DataType = keyof DataTypeMap;
-  type DataArrayType = DataTypeMap[DataType];
+// export declare namespace Encoder {
+//   export interface DataTypeMap {
+//     float: Float32Array;
+//     byte: Uint8Array;
+//     int: Uint32Array;
+//   }
+//   export type DataType = keyof DataTypeMap;
+//   type DataArrayType = DataTypeMap[DataType];
 
-  /* eslint-disable @typescript-eslint/naming-convention */
-  export const enum Usage {
-    Default = 0,
-    UploadOnly,
-    Download4BytesAsFloat32,
-  }
+//   /* eslint-disable @typescript-eslint/naming-convention */
+//   export const enum Usage {
+//     Default = 0,
+//     UploadOnly,
+//     Download4BytesAsFloat32,
+//   }
+// };
+
+export interface DataTypeMap {
+  float: Float32Array;
+  byte: Uint8Array;
+  int: Uint32Array;
+}
+export type DataType = keyof DataTypeMap;
+export type DataArrayType = DataTypeMap[DataType];
+
+/* eslint-disable @typescript-eslint/naming-convention */
+export const enum Usage {
+  Default = 0,
+  UploadOnly,
+  Download4BytesAsFloat32,
 }
 
 /**
@@ -27,9 +42,9 @@ export interface DataEncoder {
   format: number;
   textureType: number;
   channelSize: number;
-  encode(src: Encoder.DataArrayType, textureSize: number): Encoder.DataArrayType;
-  allocate(size: number): Encoder.DataArrayType;
-  decode(buffer: Encoder.DataArrayType, dataSize: number): Encoder.DataArrayType;
+  encode(src: DataArrayType, textureSize: number): DataArrayType;
+  allocate(size: number): DataArrayType;
+  decode(buffer: DataArrayType, dataSize: number): DataArrayType;
 }
 /**
  * WebGL2 data encoder
@@ -55,7 +70,7 @@ export class RedFloat32DataEncoder implements DataEncoder {
       throw new Error(`Invalid number of channels: ${channels}`);
     }
   }
-  encode(src: Encoder.DataArrayType, textureSize: number): Encoder.DataArrayType {
+  encode(src: DataArrayType, textureSize: number): DataArrayType {
     let result: Float32Array;
     let source: Float32Array;
     if (src.constructor !== Float32Array) {
@@ -73,10 +88,10 @@ export class RedFloat32DataEncoder implements DataEncoder {
     }
     return result;
   }
-  allocate(size: number): Encoder.DataArrayType {
+  allocate(size: number): DataArrayType {
     return new Float32Array(size * 4);
   }
-  decode(buffer: Encoder.DataArrayType, dataSize: number): Float32Array {
+  decode(buffer: DataArrayType, dataSize: number): Float32Array {
     if (this.channelSize === 1) {
       const filteredData = (buffer as Float32Array).filter((value, index) => index % 4 === 0).subarray(0, dataSize);
       return filteredData;
@@ -101,7 +116,7 @@ export class RGBAFloatDataEncoder implements DataEncoder {
     this.channelSize = channels;
     this.textureType = textureType || gl.FLOAT;
   }
-  encode(src: Float32Array, textureSize: number): Encoder.DataArrayType {
+  encode(src: Float32Array, textureSize: number): DataArrayType {
     let dest = src;
     if (this.channelSize === 1) {
       Logger.verbose('Encoder', 'Exploding into a larger array');
@@ -110,10 +125,10 @@ export class RGBAFloatDataEncoder implements DataEncoder {
     }
     return dest;
   }
-  allocate(size: number): Encoder.DataArrayType {
+  allocate(size: number): DataArrayType {
     return new Float32Array(size * 4);
   }
-  decode(buffer: Encoder.DataArrayType, dataSize: number): Float32Array {
+  decode(buffer: DataArrayType, dataSize: number): Float32Array {
     if (this.channelSize === 1) {
       const filteredData = (buffer as Float32Array).filter((value, index) => index % 4 === 0).subarray(0, dataSize);
       return filteredData;
@@ -142,13 +157,13 @@ export class Uint8DataEncoder implements DataEncoder {
       throw new Error(`Invalid number of channels: ${channels}`);
     }
   }
-  encode(src: Uint8Array, _textureSize: number): Encoder.DataArrayType {
+  encode(src: Uint8Array, _textureSize: number): DataArrayType {
     return new Uint8Array(src.buffer, src.byteOffset, src.byteLength);
   }
-  allocate(size: number): Encoder.DataArrayType {
+  allocate(size: number): DataArrayType {
     return new Uint8Array(size * this.channelSize);
   }
-  decode(buffer: Encoder.DataArrayType, dataSize: number): Uint8Array {
+  decode(buffer: DataArrayType, dataSize: number): Uint8Array {
     if (buffer instanceof Uint8Array) {
       return buffer.subarray(0, dataSize);
     }
