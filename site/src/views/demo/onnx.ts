@@ -21,6 +21,10 @@ export const initONNX = async() => {
     env.wasm.simd = true;
     env.wasm.numThreads = 1;
     env.wasm.proxy = false;
+    // const yolo = await createSession('yolov5n-seg.onnx');
+    // const nms = await createSession('nms-yolov5.onnx');
+    // const maskOrt = await createSession('mask-yolov5-seg.onnx');
+
     const yolo = await createSession('yolov8n-seg.onnx');
     const nms = await createSession('nms-yolov8.onnx');
     const maskOrt = await createSession('mask-yolov8-seg.onnx');
@@ -36,13 +40,22 @@ export const runONNX = async(onnxInstance: any, inputData: any, xRatio: any, yRa
     const tensor = new Tensor('float32', inputData, [1, 3, 640, 640]);
 
     const { output0, output1 } = await yolo.run({ images: tensor });
-    const config = new Tensor('float32', new Float32Array([80, 100, 0.45, 0.2]));
+    // v8
+    const config = new Tensor('float32', new Float32Array([80, 100, 0.45, 0.2])); 
+    // v5
+    // const config = new Tensor('float32', new Float32Array([100, 0.4, 0.2]));
+
     const { selected } = await nms.run({ detection: output0, config }); 
+    // v5
+    // const { selected_idx } = await nms.run({ detection: output0, config });
+    // const selected = selected_idx;
     let overlay: any = new Tensor("uint8", new Uint8Array(modelHeight * modelWidth * 4), [modelHeight, modelWidth, 4]);
     
     for (let idx = 0; idx < selected.dims[1]; idx++) {
+    // for (let idx = 0; idx < output0.dims[1]; idx++) {
+    //     if (!selected_idx.data.includes(idx)) continue; 
+        // const data = output0.data.slice(idx * output0.dims[2], (idx + 1) * output0.dims[2]);
         const data = selected.data.slice(idx * selected.dims[2], (idx + 1) * selected.dims[2]);
-        
         let box = data.slice(0, 4);
         const color = [255, 0, 255, 255];
     
@@ -57,9 +70,13 @@ export const runONNX = async(onnxInstance: any, inputData: any, xRatio: any, yRa
         maxSize);
     
         const detection = new Tensor("float32", new Float32Array([...box, ...data.slice(4 + numClass)]));
+        // v5
+        // const detection = new Tensor("float32", new Float32Array([...box, ...data.slice(5 + numClass)]));
         const maskConfig = new Tensor("float32", new Float32Array([maxSize, x, y, w, h, ...color])); 
         
         const { mask_filter } = await maskOrt.run({ detection, mask: output1, config: maskConfig, overlay});
+        // v5
+        // const { mask_filter } = await maskOrt.run({ detection, mask: output1, config: maskConfig});
         overlay = mask_filter;
     }
 

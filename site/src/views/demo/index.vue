@@ -17,7 +17,7 @@ import { getYoloInputByElm, fetchImg } from './utils';
 
 import { initONNX, runONNX } from './onnx';
 
-let img: string = $ref('1.png');
+let testImg: string = $ref('1.png');
 
 let onnx: any;
 
@@ -33,7 +33,7 @@ const downloadImg = () => {
 };
 
 const onChange = async () => {
-  const img: any = await fetchImg(img);
+  const img: any = await fetchImg(testImg);
   const { width, height } = img;
   let canvasHeight = 0;
   let canvasWidth = 0;
